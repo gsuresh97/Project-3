@@ -1,15 +1,43 @@
-//
-//  main.cpp
-//  Project 3
-//
-//  Created by Gopi Suresh on 2/15/16.
-//  Copyright © 2016 Gopi. All rights reserved.
-//
-
+#include "GameController.h"
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#include <GLUT/GLUT.h>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
 
-int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
-    return 0;
+  // If your program is having trouble finding the Assets directory,
+  // replace the string literal with a full path name to the directory,
+  // e.g., "Z:/CS32/FrackMan/Assets" or "/Users/fred/cs32/FrackMan/Assets"
+
+const string assetDirectory = "Assets"; 
+
+class GameWorld;
+
+GameWorld* createStudentWorld(string assetDir = "");
+
+int main(int argc, char* argv[])
+{
+	{
+		string path = assetDirectory;
+		if (!path.empty())
+			path += '/';
+		const string someAsset = "frack1.tga";
+		ifstream ifs(path + someAsset);
+		if (!ifs)
+		{
+			cout << "Cannot find " << someAsset << " in ";
+			cout << (assetDirectory.empty() ? "current directory"
+											: assetDirectory) << endl;
+			return 1;
+		}
+	}
+
+	srand(static_cast<unsigned int>(time(nullptr)));
+
+	GameWorld* gw = createStudentWorld(assetDirectory);
+	Game().run(argc, argv, gw, "FrackMan");
 }
