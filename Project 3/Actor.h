@@ -22,7 +22,7 @@ public:
     }
     
     virtual void act(int x, int y){
-        if (getX() == x && getY() == y){
+        if ((getX() - x) >= 0 && (getX() - x) < 4 && (getY() - y) >= 0 && (getY() - y) < 4){
             setVisible(false);
         }
     }
