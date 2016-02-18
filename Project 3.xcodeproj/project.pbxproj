@@ -48,7 +48,7 @@
 		609086321C729240000E0B71 /* SpriteManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpriteManager.h; sourceTree = "<group>"; };
 		609086351C729248000E0B71 /* StudentWorld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StudentWorld.cpp; sourceTree = "<group>"; };
 		609086361C729248000E0B71 /* StudentWorld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StudentWorld.h; sourceTree = "<group>"; };
-		609086381C729281000E0B71 /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Assets; path = "Project 3/Assets"; sourceTree = "<group>"; };
+		609086381C729281000E0B71 /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,7 +67,6 @@
 		6090860F1C72641B000E0B71 = {
 			isa = PBXGroup;
 			children = (
-				609086381C729281000E0B71 /* Assets */,
 				6014F7421C738E13009933F0 /* GLUT.framework */,
 				6014F7431C738E13009933F0 /* OpenGL.framework */,
 				6090861A1C72641B000E0B71 /* Project 3 */,
@@ -86,6 +85,7 @@
 		6090861A1C72641B000E0B71 /* Project 3 */ = {
 			isa = PBXGroup;
 			children = (
+				609086381C729281000E0B71 /* Assets */,
 				609086231C729223000E0B71 /* Actor.cpp */,
 				609086251C72922C000E0B71 /* Actor.h */,
 				609086261C72922C000E0B71 /* freeglut_ext.h */,

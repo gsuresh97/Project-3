@@ -13,7 +13,7 @@ using namespace std;
   // replace the string literal with a full path name to the directory,
   // e.g., "Z:/CS32/FrackMan/Assets" or "/Users/fred/cs32/FrackMan/Assets"
 
-const string assetDirectory = "Assets"; 
+const string assetDirectory = "/Users/family/Desktop/Gopi's Stuff/UCLA/CS32/Project 3/Project 3/Assets";
 
 class GameWorld;
 
