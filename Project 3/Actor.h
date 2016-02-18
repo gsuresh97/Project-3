@@ -49,18 +49,18 @@ public:
                     break;
                 case KEY_PRESS_RIGHT:
                     setDirection(right);
-                    if(getX() < 63)
+                    if((getX()+3) < 63)
                         moveTo(getX()+1, getY());
                     break;
                 case KEY_PRESS_UP:
-                    if(getY() < 59)
-                        setDirection(up);
-                    moveTo(getX(), getY()+1);
+                    setDirection(up);
+                    if((getY()+3) < 59)
+                        moveTo(getX(), getY()+1);
                     break;
                 case KEY_PRESS_DOWN:
+                    setDirection(down);
                     if(getY() > 0)
-                        setDirection(down);
-                    moveTo(getX(), getY() - 1);
+                        moveTo(getX(), getY() - 1);
                     break;
                 default:
                     break;

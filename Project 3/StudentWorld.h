@@ -37,7 +37,7 @@ public:
         
         
         //frackman
-        m_man = new FrackMan(IID_PLAYER, 30, 65);
+        m_man = new FrackMan(IID_PLAYER, 30, 60);
         m_man->setVisible(true);
         
         displayGameStatText(getScore(), getLevel(), getLives(), m_man->getHealth());
