@@ -4,34 +4,37 @@
 #include "GraphObject.h"
 #include "GameConstants.h"
 
+class StudentWorld;
 
 class Actor: public GraphObject{
 public:
-    Actor(int imageID, int startX, int startY, Direction dir = right, double size = 1.0, unsigned int depth = 0):GraphObject(imageID, startX, startY, dir, size, depth){
+    Actor(int imageID, int startX, int startY, StudentWorld* world, Direction dir = right, double size = 1.0, unsigned int depth = 0):GraphObject(imageID, startX, startY, dir, size, depth), m_world(world){
+        setVisible(true);
+    }
+    virtual void doSomething(bool hit, int key){
         
     }
-    virtual void act(bool hit, int key){
-        
+    StudentWorld* getWorld(){
+        return m_world;
     }
+private:
+    StudentWorld* m_world;
 };
+
 
 class Dirt : public Actor{
 public:
-    Dirt(int imageID, int startX, int startY, Direction dir = right, double size = 0.25, unsigned int depth = 0):Actor(imageID, startX, startY, dir, size, depth){
+    Dirt(int imageID, int startX, int startY, StudentWorld* world, Direction dir = right, double size = 0.25, unsigned int depth = 3):Actor(imageID, startX, startY, world, dir, size, depth){
         
     }
     
-    virtual void act(int x, int y){
-        if ((getX() - x) >= 0 && (getX() - x) < 4 && (getY() - y) >= 0 && (getY() - y) < 4){
-            setVisible(false);
-        }
-    }
+    virtual void doSomething();
 private:
 };
 
 class FrackMan : public Actor{
 public:
-    FrackMan(int imageID, int startX, int startY, Direction dir = right, double size = 1.0, unsigned int depth = 0):Actor(imageID, startX, startY, dir, size, depth){
+    FrackMan(int imageID, int startX, int startY, StudentWorld* world, Direction dir = right, double size = 1.0, unsigned int depth = 0):Actor(imageID, startX, startY, world, dir, size, depth){
         
     }
     
@@ -39,36 +42,9 @@ public:
         return 80;
     }
     
-    virtual void act(bool hit, int key){
-        if(hit){
-            switch (key) {
-                case KEY_PRESS_LEFT:
-                    setDirection(left);
-                    if(getX() > 0)
-                        moveTo(getX()-1, getY());
-                    break;
-                case KEY_PRESS_RIGHT:
-                    setDirection(right);
-                    if((getX()+3) < 63)
-                        moveTo(getX()+1, getY());
-                    break;
-                case KEY_PRESS_UP:
-                    setDirection(up);
-                    if((getY()+3) < 59)
-                        moveTo(getX(), getY()+1);
-                    break;
-                case KEY_PRESS_DOWN:
-                    setDirection(down);
-                    if(getY() > 0)
-                        moveTo(getX(), getY() - 1);
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+    virtual void doSomething();
 private:
-
+    
 };
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
