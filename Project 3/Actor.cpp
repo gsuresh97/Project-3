@@ -3,9 +3,9 @@
 
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
-void Dirt::doSomething(){}
+void Dirt::move(){}
 
-void FrackMan::doSomething(){
+void FrackMan::move(){
     int key;
     bool hit = getWorld()->getKey(key);
     if(hit){
@@ -34,4 +34,75 @@ void FrackMan::doSomething(){
                 break;
         }
     }
+}
+
+//----------------------redo
+void Actor::move(){
+    
+}
+
+//-----------------------------redo
+bool Actor::annoy(unsigned int amt){
+    return true;
+}
+
+//-----------------------------redo
+bool Actor::canActorsPassThroughMe() const{
+    return true;
+}
+
+//-----------------------------redo
+bool Actor::canDigThroughDirt() const{
+    return true;
+}
+
+//-----------------------------redo
+bool Actor::canPickThingsUp() const{
+    return true;
+}
+
+//-----------------------------redo
+bool Actor::huntsFrackMan() const{
+    return false;
+}
+
+//-----------------------------redo
+bool Actor::needsToBePickedUpToFinishLevel() const{
+    return false;
+}
+
+//-----------------------------redo
+void Agent::addGold(){
+    
+}
+
+//-----------------------------redo
+bool Agent::annoy(unsigned int amount){
+    return true;
+}
+
+//-----------------------------redo
+bool Agent::canPickThingsUp() const{
+    return true;
+}
+
+
+//-----------------------------redo
+bool FrackMan::annoy(unsigned int amount){
+    return false;
+}
+
+//-----------------------------redo
+void FrackMan::addGold(){
+    
+}
+
+//-----------------------------redo
+bool FrackMan::canDigThroughDirt() const{
+    return true;
+}
+
+//-----------------------------redo
+unsigned int Agent::getHitPoints() const{
+    return m_hitPoints;
 }

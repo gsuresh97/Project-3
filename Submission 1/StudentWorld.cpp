@@ -43,9 +43,9 @@ int StudentWorld::move()
 		  // This code is here merely to allow the game to build, run, and terminate after you hit enter a few times.
 		  // Notice that the return value GWSTATUS_PLAYER_DIED will cause our framework to end the current level.
     //decLives();
-    displayGameStatText(getScore(), getLevel(), getLives(), m_man->getHitPoints());
+    displayGameStatText(getScore(), getLevel(), getLives(), m_man->getHealth());
     
-    m_man->move();
+    m_man->doSomething();
     int mx = m_man -> getX();
     int my = m_man -> getY();
     //        if(my <= 59 && my >= 0 && mx <= 63 && mx >= 0){
@@ -87,11 +87,11 @@ int StudentWorld::init()
     
     
     //frackman
-    m_man = new FrackMan(IID_PLAYER, 30, 60, this, 10, 0);
+    m_man = new FrackMan(IID_PLAYER, 30, 60, this);
     //m_man->setWorld(&this);
     m_man->setVisible(true);
     
-    displayGameStatText(getScore(), getLevel(), getLives(), m_man->getHitPoints());
+    displayGameStatText(getScore(), getLevel(), getLives(), m_man->getHealth());
     
     return GWSTATUS_CONTINUE_GAME;
 }
