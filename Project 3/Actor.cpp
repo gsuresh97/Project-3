@@ -5,6 +5,8 @@
 using namespace std;
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 
+typedef GraphObject::Direction Dir;
+
 void Dirt::move(){}
 
 void FrackMan::move(){
@@ -65,6 +67,10 @@ void FrackMan::move(){
                     moveTo(getX(), getY() - 1);
                 else if (move && getY() == 0)
                     moveTo(getX(), getY());
+                break;
+            case KEY_PRESS_SPACE:
+                cout << "X: " << getX() << "\tY: " << getY() << endl;
+                getWorld()->addSquirt();
                 break;
             default:
                 break;
@@ -154,6 +160,38 @@ bool FrackMan::hasMoved(){
     return false;
 }
 
+void FrackMan::getSquirtDets(int &x, int &y, Dir& dir){
+    dir = getDirection();
+    switch (dir) {
+        case GraphObject::down:
+            if(getWorld()->inSquirtField(getX(), getY() - 4)){
+                x = getX();
+                y = getY() - 4;
+            }
+            break;
+        case GraphObject::up:
+            if(getWorld()->inSquirtField(getX(), getY() + 7)){
+                x = getX();
+                y = getY() + 4;
+            }
+            break;
+        case GraphObject::left:
+            if(getWorld()->inSquirtField(getX() - 4, getY())){
+                x = getX() - 4;
+                y = getY();
+            }
+            break;
+        case GraphObject::right:
+            if(getWorld()->inSquirtField(getX() + 7, getY())){
+                x = getX() + 4;
+                y = getY();
+            }
+            break;
+        default:
+            break;
+    }
+}
+
 //-----------------------------redo
 unsigned int Agent::getHitPoints() const{
     return m_hitPoints;
@@ -178,6 +216,7 @@ void Boulder::move(){
             moveTo(getX(), getY() - 1);
         else{
             setDead();
+            setVisible(false);
         }
     }
 }
@@ -196,4 +235,60 @@ char Boulder::getState(){
 }
 void Boulder::setState(char c){
     state = c;
+}
+
+void Squirt::move(){
+    Dir dir = getDirection();
+    if (getSteps() == 4) {
+        setDead();
+        setVisible(false);
+    }
+    switch (dir) {
+        case GraphObject::down:
+            if(getWorld()->inSquirtField(getX(), getY() - 1)){
+                moveTo(getX(), getY() - 1);
+                incrementSteps();
+            } else{
+                setDead();
+                setVisible(false);
+            }
+            break;
+        case GraphObject::up:
+            if(getWorld()->inSquirtField(getX(), getY() + 4)){
+                moveTo(getX(), getY() + 1);
+                incrementSteps();
+            } else{
+                setDead();
+                setVisible(false);
+            }
+            break;
+        case GraphObject::left:
+            if(getWorld()->inSquirtField(getX() - 1, getY())){
+                moveTo(getX() - 1, getY());
+                incrementSteps();
+            } else{
+                setDead();
+                setVisible(false);
+            }
+            break;
+        case GraphObject::right:
+            if(getWorld()->inSquirtField(getX() + 4, getY())){
+                moveTo(getX() + 1, getY());
+                incrementSteps();
+            } else{
+                setDead();
+                setVisible(false);
+            }
+            break;
+        default:
+            break;
+    }
+    
+
+}
+int Squirt::getSteps(){
+    return steps;
+}
+void Squirt::incrementSteps(){
+    steps++;
 }

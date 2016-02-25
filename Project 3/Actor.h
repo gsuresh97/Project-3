@@ -112,6 +112,7 @@ public:
     
     // Get amount of water
     unsigned int getWater() const;
+    void getSquirtDets(int& x, int& y, GraphObject::Direction& dir);
     
     virtual ~FrackMan(){}
 private:
@@ -194,10 +195,14 @@ private:
 class Squirt : public Actor
 {
 public:
-    Squirt(int imageID, int startX, int startY, StudentWorld* world):Actor(imageID, startX, startY, world){
-        
+    Squirt(int imageID, int startX, int startY, StudentWorld* world, Direction dir = down, double size = 1, unsigned int depth = 1):Actor(imageID, startX, startY, world, dir, size, depth){
+        steps = 0;
     }
     virtual void move();
+    int getSteps();
+    void incrementSteps();
+private:
+    int steps;
 };
 
 class ActivatingObject : public Actor

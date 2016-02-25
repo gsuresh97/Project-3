@@ -123,6 +123,10 @@ bool StudentWorld::inOilField(int x, int y){
     return (x < 64 && x >= 0 && y < 60 && y >= 0);
 }
 
+bool StudentWorld::inSquirtField(int x, int y){
+    return (x < 64 && x >= 0 && y < 64 && y >= 0);
+}
+
 void StudentWorld::clearDirt(int x, int y){
     for(int my = y; my < y + 4; my++){
         for (int mx = x; mx < x+4; mx++) {
@@ -139,9 +143,7 @@ bool StudentWorld::isNear(int x1, int y1, int x2, int y2, int dist){
 }
 
 bool StudentWorld::isFreeUnder(int x, int y){
-    if(!(m_dirt[59 - y - 1][x] == nullptr && m_dirt[59 - y - 1][x + 1] == nullptr && m_dirt[59 - y - 1][x + 2] == nullptr && m_dirt[59 - y - 1][x + 3] == nullptr))
-        cout << "X: " <<x << "\t Y: " << y << endl;
-    return m_dirt[59 - y - 1][x] == nullptr && m_dirt[59 - y - 1][x + 1] == nullptr && m_dirt[59 - y - 1][x + 2] == nullptr && m_dirt[59 - y - 1][x + 3] == nullptr;
+    return m_dirt[59 - y + 1][x] == nullptr && m_dirt[59 - y + 1][x + 1] == nullptr && m_dirt[59 - y + 1][x + 2] == nullptr && m_dirt[59 - y + 1][x + 3] == nullptr;
 }
 
 bool StudentWorld::canMoveDown(int x, int y){
@@ -161,6 +163,19 @@ bool StudentWorld::canMoveDown(int x, int y){
         }
     }
     return isFreeUnder(x, y);
+}
+
+void StudentWorld::addSquirt(){
+    Squirt* it;
+    int x = -1;
+    int y = -1;
+    GraphObject::Direction dir = GraphObject::none;
+    m_man->getSquirtDets(x, y, dir);
+    if(x != -1 && y!= -1){
+        it = new Squirt(IID_WATER_SPURT, x, y, this, dir, 1, 1);
+        items.push_back(it);
+        it->setVisible(true);
+    }
 }
 
 void StudentWorld:: displayGameStatText(int score, int level, int lives, int health){

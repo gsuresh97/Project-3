@@ -27,12 +27,14 @@ public:
     
     void clearDirt(int x, int y);
     bool inOilField(int x, int y);
+    bool inSquirtField(int x, int y);
     void displayGameStatText(int score, int level, int lives, int health);
     bool isNear(int x1, int y1, int x2, int y2, int dist);
     std::vector<Actor*> getItems();
     bool goodSpotBGO(int x, int y);
     bool isFreeUnder(int x, int y);
     bool canMoveDown(int x, int y);
+    void addSquirt();
     
 private:
     Dirt* m_dirt[60][64];
