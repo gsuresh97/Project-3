@@ -10,6 +10,7 @@ class Actor : public GraphObject
 public:
     Actor(int imageID, int startX, int startY, StudentWorld* world, Direction dir = right, double size = 1.0, unsigned int depth = 0):GraphObject(imageID, startX, startY, dir, size, depth), m_world(world){
         setVisible(true);
+        dead = false;
     }
     
     // Action to perform each tick. ----------------------------------------make pure virtual
@@ -51,6 +52,7 @@ public:
     
 private:
     StudentWorld* m_world;
+    bool dead;
 };
 
 class Agent : public Actor
@@ -69,6 +71,8 @@ public:
     unsigned int getScore() const;
     void setHitPoints();
     void setScore();
+    
+    virtual bool hasMoved() = 0;
     
     //-----------------------------------------------------------redo
     virtual bool annoy(unsigned int amount);
@@ -91,7 +95,9 @@ public:
     virtual bool annoy(unsigned int amount);
     virtual void addGold();
     virtual bool canDigThroughDirt() const;
+
     
+    virtual bool hasMoved();
     // Pick up a sonar kit.
     void addSonar();
     
@@ -108,6 +114,8 @@ public:
     unsigned int getWater() const;
     
     virtual ~FrackMan(){}
+private:
+    bool m_moved;
 };
 
 
@@ -166,11 +174,21 @@ private:
 class Boulder : public Actor
 {
 public:
-    Boulder(int imageID, int startX, int startY, StudentWorld* world):Actor(imageID, startX, startY, world){
-        
+    Boulder(int imageID, int startX, int startY, StudentWorld* world, Direction dir = down, double size = 1, unsigned int depth = 1):Actor(imageID, startX, startY, world, dir, size, depth){
+        state = 's';
+        wait = 0;
     }
     virtual void move();
     virtual bool canActorsPassThroughMe() const;
+    void setState(char c);
+    char getState();
+    int getW();
+    void incrementW();
+    
+    
+private:
+    char state;
+    int wait;
 };
 
 class Squirt : public Actor
