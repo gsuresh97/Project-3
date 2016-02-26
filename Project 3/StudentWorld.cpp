@@ -2,6 +2,7 @@
 #include <string>
 #include <cmath>
 using namespace std;
+typedef GraphObject::Direction Dir;
 
 class Coords{
 public:
@@ -69,7 +70,7 @@ int StudentWorld::move()
     //displayGameStatText(getScore(), getLevel(), getLives(), m_man->getHitPoints());
     //string stat = "Scr: ";
     char score[200];
-    sprintf(score, "Scr: %0.6u  Lvl: %2u  Lives: %.1u  Hlth: %3u%%  Wtr: %2u  Gld: %2u  Sonar: %2u  Oil Left: %2d", getScore(), getLevel(), getLives(), (m_man->getHitPoints()/10)*100, m_man->getWater(), m_man->getGold(), m_man->getSonar(), numOil);
+    sprintf(score, "Scr: %0.6u  Lvl: %2u  Lives: %.1u  Hlth: %3u%%  Wtr: %2u  Gld: %2u  Sonar: %2u  Oil Left: %2d", getScore(), getLevel(), getLives(), (int)((double)(m_man->getHitPoints()/10)*100), m_man->getWater(), m_man->getGold(), m_man->getSonar(), numOil);
     setGameStatText(score);
     
     if (rand()%(getLevel()*25+300)==1) {
@@ -244,6 +245,11 @@ bool StudentWorld::canMoveDown(int x, int y){
         return false;
     if (isNear(x, y, m_man->getX(), m_man->getY(), 3)) {
         m_man->setDead();
+    }
+    for (int i = 0; i < items.size(); i++) {
+        if (items[i]->getID() == IID_HARD_CORE_PROTESTER || items[i]->getID() == IID_PROTESTER) {
+            items[i]->setDead();
+        }
     }
     for (int i = 0; i < items.size(); i++) {
         if(items[i]->getID() == IID_BOULDER){
@@ -427,4 +433,275 @@ void StudentWorld::chargeFound(){
 
 void StudentWorld::waterFound(){
     m_man->addWater();
+}
+
+bool StudentWorld::canAnnoy(int x, int y, GraphObject::Direction dir){
+    if (!isNear(x, y, m_man->getX(), m_man->getY(), 4)) {
+        return false;
+    }
+    switch (dir) {
+        case GraphObject::left:
+            return m_man->getX() <= x;
+        case GraphObject::right:
+            return m_man->getX() >= x;
+        case GraphObject::up:
+            return m_man->getY() >= y;
+        case GraphObject::down:
+            return m_man->getY() <= y;
+        default:
+            return false;
+    }
+}
+
+void StudentWorld::annoyFrackMan(int hp){
+    m_man->annoy(hp);
+}
+
+bool StudentWorld::lineOfSight(Protester* a, GraphObject::Direction& dir){
+    int x = a->getX();
+    int y = a->getY();
+    int mx = m_man->getX();
+    int my = m_man->getY();
+    if (isNear(x, y, mx, my, 4) || (abs(mx - x) > 3 && abs(my - y) > 3) )
+        return false;
+    if (abs(my - y) < 4 && mx - x < 0) {
+        for (int iy = y; iy < y+4; iy++) {
+            for (int ix = x; ix >= mx; ix--) {
+                if (inSquirtField(ix, iy) && m_dirt[59 - iy][ix] != nullptr) {
+                    return false;
+                }
+                for (int i = 0; i < items.size(); i++) {
+                    if (!items[i]->canActorsPassThroughMe() && isNear(ix, y, items[i]->getX(), items[i]->getY(), 3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (a->getDirection()==GraphObject::up || a->getDirection()==GraphObject::down) {
+            a->resetPerpendicularTurn();
+        }
+        dir = GraphObject::left;
+    } else if (abs(my - y) < 4 && mx - x > 0) {
+        for (int iy = y; iy < y+4; iy++) {
+            for (int ix = x; ix <= mx; ix++) {
+                if (m_dirt[59 - iy][ix] != nullptr) {
+                    return false;
+                }
+                for (int i = 0; i < items.size(); i++) {
+                    if (!items[i]->canActorsPassThroughMe() && isNear(ix, y, items[i]->getX(), items[i]->getY(), 3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (a->getDirection()==GraphObject::up || a->getDirection()==GraphObject::down) {
+            a->resetPerpendicularTurn();
+        }
+        dir = GraphObject::right;
+    } else if (abs(mx - x) < 4 && my - y < 0) {
+        for (int ix = x; ix < x+4; ix++) {
+            for (int iy = y; iy >= my; iy--) {
+                if (m_dirt[59 - iy][ix] != nullptr) {
+                    return false;
+                }
+                for (int i = 0; i < items.size(); i++) {
+                    if (!items[i]->canActorsPassThroughMe() && isNear(x, iy, items[i]->getX(), items[i]->getY(), 3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (a->getDirection()==GraphObject::left || a->getDirection()==GraphObject::right) {
+            a->resetPerpendicularTurn();
+        }
+        dir = GraphObject::down;
+    } else if (abs(mx - x) < 4 && my - y > 0) {
+        for (int ix = x; ix < x+4; ix++) {
+            for (int iy = y; iy <= my; iy++) {
+                if (m_dirt[59 - iy][ix] != nullptr) {
+                    return false;
+                }
+                for (int i = 0; i < items.size(); i++) {
+                    if (!items[i]->canActorsPassThroughMe() && isNear(x, iy, items[i]->getX(), items[i]->getY(), 3)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (a->getDirection()==GraphObject::left || a->getDirection()==GraphObject::right) {
+            a->resetPerpendicularTurn();
+        }
+        dir = GraphObject::up;
+    }
+    return true;
+}
+
+bool StudentWorld::canMove(Actor *a, GraphObject::Direction dir){
+    switch (dir) {
+        case GraphObject::left:
+            if (!inSquirtField(a->getX() - 1, a->getY())) {
+                return false;
+            }
+            for (int i = 0; i < 4; i++) {
+                if (inOilField(a->getX(), a->getY()) && m_dirt[59 - (a->getY()+i)][a->getX() - 1] != nullptr) {
+                    return false;
+                }
+            }
+            for (int i = 0; i < items.size(); i++) {
+                if (!items[i]->canActorsPassThroughMe() && isNear(a->getX()-1, a->getY(), items[i]->getX(), items[i]->getY(), 3)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        case GraphObject::right:
+            if (!inSquirtField(a->getX() + 4, a->getY())) {
+                return false;
+            }
+            for (int i = 0; i < 4; i++) {
+                if (inOilField(a->getX(), a->getY()) && m_dirt[59 - (a->getY()+i)][a->getX() + 4] != nullptr) {
+                    return false;
+                }
+            }
+            for (int i = 0; i < items.size(); i++) {
+                if (!items[i]->canActorsPassThroughMe() && isNear(a->getX() + 4, a->getY(), items[i]->getX(), items[i]->getY(), 3)) {
+                    return false;
+                }
+            }
+            return true;
+        case GraphObject::down:
+            if (!inSquirtField(a->getX(), a->getY() - 1)) {
+                return false;
+            }
+            for (int i = 0; i < 4; i++) {
+                if (m_dirt[59 - (a->getY()- 1)][a->getX() + i] != nullptr) {
+                    return false;
+                }
+            }
+            for (int i = 0; i < items.size(); i++) {
+                if (!items[i]->canActorsPassThroughMe() && isNear(a->getX(), a->getY() - 1, items[i]->getX(), items[i]->getY(), 3)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        case GraphObject::up:
+            if (!inSquirtField(a->getX(), a->getY() + 4)) {
+                return false;
+            }
+            for (int i = 0; i < 4; i++) {
+                if (m_dirt[59 - (a->getY() + 4)][a->getX() + i] != nullptr) {
+                    return false;
+                }
+            }
+            for (int i = 0; i < items.size(); i++) {
+                if (!items[i]->canActorsPassThroughMe() && isNear(a->getX(), a->getY() + 4, items[i]->getX(), items[i]->getY(), 3)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool StudentWorld::moveOne(Actor* a, GraphObject::Direction dir){
+    if (!canMove(a, dir)) {
+        return false;
+    }
+    switch (dir) {
+        case GraphObject::left:
+            a->moveTo(a->getX() - 1, a->getY());
+            break;
+        case GraphObject::right:
+            a->moveTo(a->getX() + 1, a->getY());
+            break;
+        case GraphObject::up:
+            a->moveTo(a->getX(), a->getY() + 1);
+            break;
+        case GraphObject::down:
+            a->moveTo(a->getX(), a->getY()-1);
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
+GraphObject::Direction StudentWorld::getRandDirection(Actor* a){
+    Dir ran = Dir::none;
+    do {
+    int r = rand() % 4;
+    switch (r) {
+        case 0:
+            ran = Dir::up;
+            break;
+        case 1:
+            ran = Dir::right;
+            break;
+        case 2:
+            ran = Dir::down;
+            break;
+        case 3:
+            ran = Dir::left;
+        default:
+            break;
+    }
+    } while (!canMove(a, ran));
+    return ran;
+}
+
+bool StudentWorld::atIntersection(Protester *a, GraphObject::Direction& dir){
+    bool left;
+    bool right;
+    bool up;
+    bool down;
+    switch (a->getDirection()) {
+        case GraphObject::up:
+        case GraphObject::down:
+            left = canMove(a, GraphObject::left);
+            right = canMove(a, GraphObject::right);
+            if (!left && !right) {
+                return false;
+            } else if (!left && right){
+                dir = GraphObject::right;
+                return true;
+            } else if (left && !right){
+                dir = GraphObject::left;
+                return true;
+            } else if (left && right){
+                if (rand()%2 == 1) {
+                    dir = GraphObject::right;
+                } else {
+                    dir = GraphObject::left;
+                }
+                return true;
+            }
+            break;
+        case GraphObject::left:
+        case GraphObject::right:
+            up = canMove(a, GraphObject::up);
+            down = canMove(a, GraphObject::down);
+            if (!up && !down) {
+                return false;
+            } else if (!up && down){
+                dir = GraphObject::down;
+                return true;
+            } else if (up && !down){
+                dir = GraphObject::up;
+                return true;
+            } else if (up && down){
+                if (rand()%2 == 1) {
+                    dir = GraphObject::down;
+                } else {
+                    dir = GraphObject::up;
+                }
+                return true;
+            }
+            break;
+        default:
+            break;
+    }
+    return false;
 }

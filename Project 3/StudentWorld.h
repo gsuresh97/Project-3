@@ -35,6 +35,7 @@ public:
     bool isFreeUnder(int x, int y);
     bool canMoveDown(int x, int y);
     void addSquirt();
+    bool canMove(Actor* a, GraphObject::Direction dir);
     void addGold();
     void addSonarWater();
     void addProtestor();
@@ -45,6 +46,12 @@ public:
     void waterFound();
     void chargeFound();
     bool fourFree(int x, int y);
+    bool canAnnoy(int x, int y, GraphObject::Direction dir);
+    void annoyFrackMan(int hp);
+    bool lineOfSight(Protester* a, GraphObject::Direction& dir);
+    bool moveOne(Actor* a, GraphObject::Direction dir);
+    bool atIntersection(Protester* a, GraphObject::Direction& dir);
+    GraphObject::Direction getRandDirection(Actor* a);
     
 private:
     Dirt* m_dirt[60][64];

@@ -3,7 +3,7 @@
 
 #include "GraphObject.h"
 
-class StudentWorld; //-----------------------fix squirt problem doesn't display squirt at the end of the oil fields but adds squirt object to array. Fix repetition of code in studentworld cansquirtmove and canbouldermove. Boulder blocking squirt is buggy. I think dirt blocks the squirt fine. pay special attention to (my - y) in the down direction for canSquirtMove(). should it be equal to 5 or less than or equal to 5. Correct number of boulders doesn't spawn for each level.
+class StudentWorld; //-----------------------fix squirt problem doesn't display squirt at the end of the oil fields but adds squirt object to array. Fix repetition of code in studentworld cansquirtmove and canbouldermove. Boulder blocking squirt is buggy. I think dirt blocks the squirt fine. pay special attention to (my - y) in the down direction for canSquirtMove(). should it be equal to 5 or less than or equal to 5. Correct number of boulders doesn't spawn for each level. Check regular Protestor truning.
 
 class Actor : public GraphObject
 {
@@ -137,7 +137,9 @@ class Protester : public Agent
 public:
     Protester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = left, double size = 1.0, unsigned int depth = 0):Agent(imageID, startX, startY, world, hitPoints, score, dir, size, depth){
         shouldLeave = false;
-        
+        setTicksPerMove();
+        tl = getTicksPerMove();
+        hs = 0;
     }
     virtual void move();
     virtual bool annoy(unsigned int amount);
@@ -154,10 +156,19 @@ public:
     int getTicksLeft();
     void setTicksLeft(int ticks);
     void decTicksLeft();
+    bool hasShouted();
+    void decHasShouted();
+    void resetHasShouted();
+    bool hasMadePerpendicularTurn();
+    void decPerpendicularTurn();
+    void resetPerpendicularTurn();
+    
 private:
     bool shouldLeave;
     int tpm;
     int tl;
+    int hs;
+    int hasmadepturn;
 };
 
 class RegularProtester : public Protester
@@ -165,11 +176,13 @@ class RegularProtester : public Protester
 public:
     RegularProtester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score):Protester(imageID, startX, startY, world, hitPoints, score){
         stepsToMove = rand() % 53 + 8;
+        stepsLeft = stepsToMove;
     }
     virtual void move();
     virtual void addGold();
 private:
     int stepsToMove;
+    int stepsLeft;
 };
 
 class HardcoreProtester : public Protester

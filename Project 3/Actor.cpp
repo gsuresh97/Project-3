@@ -15,7 +15,9 @@ void FrackMan::move(){
     bool hit = getWorld()->getKey(key);
     vector<Actor*> bob = getWorld()->getItems();
     bool move = true;
-
+    if (getHitPoints() <= 0) {
+        setDead();
+    }
     if(hit){
         switch (key) {
             case KEY_PRESS_LEFT:
@@ -189,6 +191,7 @@ unsigned int Agent::getScore() const{
 //-----------------------------redo
 bool FrackMan::annoy(unsigned int amount){
     decrementHitPoints(amount);
+    cout << getHitPoints() << endl;
     return true;
 }
 
@@ -304,12 +307,101 @@ void Protester::addGold(){
     
 }
 
+bool Protester::hasShouted(){
+    return hs > 0;
+}
+
+void Protester::resetHasShouted(){
+    hs = 15;
+}
+
+void Protester::decHasShouted(){
+    hs--;
+}
+
 bool Protester::huntsFrackMan() const{
     return true;
 }
 
+bool Protester::hasMadePerpendicularTurn(){
+    return hasmadepturn > 0;
+}
+
+void Protester::decPerpendicularTurn(){
+    hasmadepturn--;
+}
+
+void Protester::resetPerpendicularTurn(){
+    hasmadepturn = 200;
+}
+
 void RegularProtester::move(){
+    //dead
+    if (!isAlive()) {
+        return;
+    }
     
+    vector<Actor*> items;
+//    for (int i =0; i < getWorld()->getItems().size(); i++) {
+//        if (getWorld()->isNear(getX(), getY(), items[i]->getX(), items[i]->getY(), 3) && !items[i]->canActorsPassThroughMe()) {
+//            
+//        }
+//    }
+    
+    //waiting
+    if (getTicksLeft() > 0) {
+        decTicksLeft();
+        return;
+    } else{
+        setTicksPerMove();
+        setTicksLeft(getTicksPerMove());
+    }
+    decPerpendicularTurn();
+    //shouting gap
+    if (hasShouted()) {
+        decHasShouted();
+    }
+    
+    //maze solving leave
+    if (shouldLeaveOilField()) {
+        //leave
+        
+        setDead();
+        return;
+    }
+    
+    if (!hasShouted() && getWorld()->canAnnoy(getX(), getY(), getDirection())) {
+        getWorld()->playSound(SOUND_PROTESTER_YELL);
+        getWorld()->annoyFrackMan(2);
+        resetHasShouted();
+        return;
+    }
+    Dir dir = none;
+    if (getWorld()->lineOfSight(this, dir)) {
+        if (dir != none) {
+            setDirection(dir);
+            if (getWorld()->moveOne(this, dir)) {
+                ;
+            }
+        }
+        return;
+    }
+    dir = getDirection();
+    //if (stepsLeft > 0 && getWorld()->canMove(this, dir)) {
+    if (stepsLeft <= 0) {
+        dir = getWorld()->getRandDirection(this);
+        setDirection(dir);
+        stepsLeft = rand() % 53 + 8;
+    } else if (!hasMadePerpendicularTurn() && getWorld()->atIntersection(this, dir)) {
+        setDirection(dir);
+        stepsLeft = rand() % 53 + 8;
+        resetPerpendicularTurn();
+    }
+    if (getWorld()->canMove(this, getDirection())) {
+        getWorld()->moveOne(this, dir);
+    } else{
+        stepsLeft = 0;
+    }
 }
 
 void RegularProtester::addGold(){
