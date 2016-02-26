@@ -35,6 +35,15 @@ public:
     bool isFreeUnder(int x, int y);
     bool canMoveDown(int x, int y);
     void addSquirt();
+    void addGold();
+    void addSonarWater();
+    bool squirtCanMove(int x, int y, GraphObject::Direction dir);
+    bool isFrackManNear(int x, int y, int dist);
+    void oilFound();
+    void goldFound();
+    void waterFound();
+    void chargeFound();
+    bool fourFree(int x, int y);
     
 private:
     Dirt* m_dirt[60][64];
@@ -43,6 +52,10 @@ private:
     int numNuggets;
     int numOil;
     std::vector<Actor*> items;
+    int protestorAdded;
+    int targetProtestors;
+    int numProtestors;
+    int probHardcore;
 };
 
 #endif // STUDENTWORLD_H_

@@ -3,7 +3,7 @@
 
 #include "GraphObject.h"
 
-class StudentWorld;
+class StudentWorld; //-----------------------fix squirt problem doesn't display squirt at the end of the oil fields but adds squirt object to array. Fix repetition of code in studentworld cansquirtmove and canbouldermove. Boulder blocking squirt is buggy. I think dirt blocks the squirt fine. pay special attention to (my - y) in the down direction for canSquirtMove(). should it be equal to 5 or less than or equal to 5. Correct number of boulders doesn't spawn for each level.
 
 class Actor : public GraphObject
 {
@@ -65,14 +65,13 @@ public:
     
     // Pick up a gold nugget. ----------------------------redo
     virtual void addGold();
-    
     // How many hit points does this actor have left?
     unsigned int getHitPoints() const;
     unsigned int getScore() const;
-    void setHitPoints();
-    void setScore();
+    void setHitPoints(unsigned int hp);
+    void decrementHitPoints(unsigned int hp);
     
-    virtual bool hasMoved() = 0;
+    //virtual bool hasMoved() = 0;
     
     //-----------------------------------------------------------redo
     virtual bool annoy(unsigned int amount);
@@ -90,6 +89,10 @@ class FrackMan : public Agent
 public:
     FrackMan(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = right, double size = 1.0, unsigned int depth = 0):Agent(imageID, startX, startY, world, hitPoints, score, dir, size, depth){
         
+        setHitPoints(hitPoints);
+        m_water = 5;
+        m_sonar_charges = 1;
+        m_gold = 0;
     }
     virtual void move();
     virtual bool annoy(unsigned int amount);
@@ -104,6 +107,8 @@ public:
     // Pick up water.
     void addWater();
     
+    void decGold();
+    
     // Get amount of gold
     unsigned int getGold() const;
     
@@ -112,11 +117,17 @@ public:
     
     // Get amount of water
     unsigned int getWater() const;
+    
+    //get Hit points
     void getSquirtDets(int& x, int& y, GraphObject::Direction& dir);
     
     virtual ~FrackMan(){}
 private:
     bool m_moved;
+    unsigned int m_water;
+    unsigned int m_sonar_charges;
+    unsigned int m_gold;
+    
 };
 
 
@@ -124,8 +135,8 @@ private:
 class Protester : public Agent
 {
 public:
-    Protester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = right, double size = 1.0, unsigned int depth = 0):Agent(imageID, startX, startY, world, hitPoints, score, dir, size, depth){
-        
+    Protester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = left, double size = 1.0, unsigned int depth = 0):Agent(imageID, startX, startY, world, hitPoints, score, dir, size, depth){
+        shouldLeave = false;
     }
     virtual void move();
     virtual bool annoy(unsigned int amount);
@@ -137,6 +148,12 @@ public:
     
     // Set number of ticks until next move
     void setTicksToNextMove();
+    
+    bool shouldLeaveOilField();
+    void leave();
+    
+private:
+    bool shouldLeave;
 };
 
 class RegularProtester : public Protester
@@ -200,6 +217,7 @@ public:
     }
     virtual void move();
     int getSteps();
+    virtual bool canActorsPassThroughMe() const;
     void incrementSteps();
 private:
     int steps;
@@ -209,41 +227,67 @@ class ActivatingObject : public Actor
 {
 public:
     ActivatingObject(int imageID, int startX, int startY, StudentWorld* world,
-                     int soundToPlay, bool activateOnPlayer,
-                     bool activateOnProtester, bool initallyActive);
+                     /*, bool activateOnPlayer,
+                     bool activateOnProtester, bool initallyActive*/Direction dir = down, double size = 1, unsigned int depth = 1):Actor(imageID, startX, startY, world, dir, size, depth){
+    }
     virtual void move();
+    void playSound(int x);
     
     // Set number of ticks until this object dies
-    void setTicksToLive();
+    void setTicksToLive(int ticks);
+private:
+    int ttl;
 };
 
 class OilBarrel : public ActivatingObject
 {
 public:
-    OilBarrel(StudentWorld* world, int startX, int startY);
+    OilBarrel(int imageID, int startX, int startY, StudentWorld* world):ActivatingObject(imageID, startX, startY, world, right, 1, 2){
+        
+    }
     virtual void move();
+    virtual bool canActorsPassThroughMe() const;
     virtual bool needsToBePickedUpToFinishLevel() const;
 };
 
 class GoldNugget : public ActivatingObject
 {
 public:
-    GoldNugget(StudentWorld* world, int startX, int startY, bool temporary);
+    GoldNugget(int imageID, int startX, int startY, StudentWorld* world):ActivatingObject(imageID, startX, startY, world, right, 1, 2){
+        
+    }
+    virtual bool canActorsPassThroughMe() const;
     virtual void move();
+    bool forFrackMan();
+    void setForFrackMan();
+    void setForProtestor();
+private:
+    bool m_forF;
+    int wait;
 };
 
 class SonarKit : public ActivatingObject
 {
 public:
-    SonarKit(StudentWorld* world, int startX, int startY);
+    SonarKit(int imageID, int startX, int startY, StudentWorld* world):ActivatingObject(imageID, startX, startY, world, right, 1, 2){
+        setWait();
+    }
+    void setWait();
     virtual void move();
+private:
+    int wait;
 };
 
 class WaterPool : public ActivatingObject
 {
 public:
-    WaterPool(StudentWorld* world, int startX, int startY);
+    WaterPool(int imageID, int startX, int startY, StudentWorld* world):ActivatingObject(imageID, startX, startY, world, right, 1, 2){
+        setWait();
+    }
     virtual void move();
+    void setWait();
+private:
+    int wait;
 };
 
 #endif // ACTOR_H_
