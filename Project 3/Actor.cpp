@@ -275,6 +275,26 @@ void Protester::leave(){
     shouldLeave = true;
 }
 
+int Protester::getTicksLeft(){
+    return tl;
+}
+
+int Protester::getTicksPerMove(){
+    return tpm;
+}
+
+void Protester::setTicksPerMove(){
+    tpm = 3-(int)(getWorld()->getLevel())/4 < 0? 0 : 3-getWorld()->getLevel()/4;
+}
+
+void Protester::setTicksLeft(int ticks){
+    tl = ticks;
+}
+
+void Protester::decTicksLeft(){
+    tl--;
+}
+
 bool Protester::annoy(unsigned int amount){
     decrementHitPoints(amount);
     return true;

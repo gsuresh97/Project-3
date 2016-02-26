@@ -137,6 +137,7 @@ class Protester : public Agent
 public:
     Protester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = left, double size = 1.0, unsigned int depth = 0):Agent(imageID, startX, startY, world, hitPoints, score, dir, size, depth){
         shouldLeave = false;
+        
     }
     virtual void move();
     virtual bool annoy(unsigned int amount);
@@ -146,24 +147,29 @@ public:
     // Set state to having gien up protest
     void setMustLeaveOilField();
     
-    // Set number of ticks until next move
-    void setTicksToNextMove();
-    
     bool shouldLeaveOilField();
     void leave();
-    
+    int getTicksPerMove();
+    void setTicksPerMove();
+    int getTicksLeft();
+    void setTicksLeft(int ticks);
+    void decTicksLeft();
 private:
     bool shouldLeave;
+    int tpm;
+    int tl;
 };
 
 class RegularProtester : public Protester
 {
 public:
     RegularProtester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score):Protester(imageID, startX, startY, world, hitPoints, score){
-        
+        stepsToMove = rand() % 53 + 8;
     }
     virtual void move();
     virtual void addGold();
+private:
+    int stepsToMove;
 };
 
 class HardcoreProtester : public Protester

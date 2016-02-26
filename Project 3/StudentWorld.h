@@ -37,6 +37,7 @@ public:
     void addSquirt();
     void addGold();
     void addSonarWater();
+    void addProtestor();
     bool squirtCanMove(int x, int y, GraphObject::Direction dir);
     bool isFrackManNear(int x, int y, int dist);
     void oilFound();

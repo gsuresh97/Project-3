@@ -184,21 +184,12 @@ int StudentWorld::init()
     m_man = new FrackMan(IID_PLAYER, 30, 60, this, 10, 0);
     m_man->setVisible(true);
     
+    
+    //prtestors
     protestorAdded = 25 > 200-getLevel()?25:200-getLevel();
     targetProtestors = 15 < 2 + getLevel()*1.5? 15:2 + getLevel()*1.5;
-    numProtestors = 1;
-    probHardcore = getLevel() * 10 + 30 < 90? getLevel() * 10 + 30: 90;
-    if (rand() % 100 < probHardcore) {
-        //create Hardcore
-        HardcoreProtester* p = new HardcoreProtester(IID_HARD_CORE_PROTESTER, 60, 60, this, 20, 0);
-        items.push_back(p);
-        p->setVisible(true);
-    } else{
-        //create regular
-        RegularProtester* p = new RegularProtester(IID_PROTESTER, 60, 60, this, 5, 0);
-        items.push_back(p);
-        p->setVisible(true);
-    }
+    numProtestors = 0;
+    addProtestor();
         
     return GWSTATUS_CONTINUE_GAME;
 }
@@ -386,6 +377,23 @@ void StudentWorld::addSonarWater(){
         w->setVisible(true);
         items.push_back(w);
         
+    }
+}
+
+void StudentWorld::addProtestor(){
+    numProtestors++;
+    probHardcore = getLevel() * 10 + 30 < 90? getLevel() * 10 + 30: 90;
+    if (rand() % 100 < probHardcore) {
+        //create Hardcore
+        HardcoreProtester* p = new HardcoreProtester(IID_HARD_CORE_PROTESTER, 60, 60, this, 20, 0);
+        items.push_back(p);
+        p->setVisible(true);
+    } else{
+        //create regular
+        RegularProtester* p = new RegularProtester(IID_PROTESTER, 60, 60, this, 5, 0);
+        items.push_back(p);
+        p->setTicksPerMove();
+        p->setVisible(true);
     }
 }
 
