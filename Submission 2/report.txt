@@ -399,5 +399,6 @@ Ambiguity:
 1. None that I took note of.
 
 Testing Classes:
+For Frackman, I tested if the actor could eat through the dirt, I tested the sounds, I made the frackman go to all the edges of the board to see if there are any issues.
 
-Tested all the things mentioned in the spec as I was coding. Some things failed. These are mentioned above.
+I Tested all the things mentioned in the spec as I was coding. Some things failed. These are mentioned above.
