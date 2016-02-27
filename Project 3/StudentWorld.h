@@ -28,7 +28,6 @@ public:
     void clearDirt(int x, int y);
     bool inOilField(int x, int y);
     bool inSquirtField(int x, int y);
-    void displayGameStatText(int score, int level, int lives, int health);
     bool isNear(int x1, int y1, int x2, int y2, int dist);
     std::vector<Actor*> getItems();
     bool goodSpotBGO(int x, int y);
@@ -51,6 +50,10 @@ public:
     bool lineOfSight(Protester* a, GraphObject::Direction& dir);
     bool moveOne(Actor* a, GraphObject::Direction dir);
     bool atIntersection(Protester* a, GraphObject::Direction& dir);
+    bool askForGold(Protester* p);
+    bool isTrackable(int x, int y, int dist);
+    void solveFrackman(Protester* p, int&x, int&y);
+    void updateFrackManMaze();
     GraphObject::Direction getRandDirection(Actor* a);
     
 private:
@@ -64,6 +67,8 @@ private:
     int targetProtestors;
     int numProtestors;
     int probHardcore;
+    int tToProtestor;
+    char frackManMaze[64][64];
 };
 
 #endif // STUDENTWORLD_H_

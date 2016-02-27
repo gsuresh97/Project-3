@@ -14,7 +14,7 @@ public:
     }
     
     // Action to perform each tick. ----------------------------------------make pure virtual
-    virtual void move();
+    virtual void move()=0;
     
     // Is this actor alive?
     bool isAlive() const;
@@ -29,26 +29,11 @@ public:
     StudentWorld* getWorld() const{
         return m_world;
     }
-
     
     // Can other actors pass through this actor? ----------------------------redo
     virtual bool canActorsPassThroughMe() const;
     
-    // Can this actor dig through dirt? ----------------------------redo
-    virtual bool canDigThroughDirt() const;
-    
-    // Can this actor pick items up? ----------------------------redo
-    virtual bool canPickThingsUp() const;
 
-    // Does this actor hunt the FrackMan? ----------------------------redo
-    virtual bool huntsFrackMan() const;
-    
-    // Can this actor need to be picked up to finish the level? ----------------------------redo
-    virtual bool needsToBePickedUpToFinishLevel() const;
-    
-    // Move this actor to x,y if possible, and return true; otherwise,
-    // return false without moving.
-    bool moveToIfPossible(int x, int y);
     
 private:
     StudentWorld* m_world;
@@ -77,7 +62,7 @@ public:
     virtual bool annoy(unsigned int amount);
     
     //------------------------------------------------------------redo
-    virtual bool canPickThingsUp() const;
+    //virtual bool canPickThingsUp() const;
     
 private:
     unsigned int m_hitPoints;
@@ -97,19 +82,12 @@ public:
     virtual void move();
     virtual bool annoy(unsigned int amount);
     virtual void addGold();
-    virtual bool canDigThroughDirt() const;
 
     
-    virtual bool hasMoved();
-    // Pick up a sonar kit.
+    bool hasMoved();
     void addSonar();
-    
-    // Pick up water.
     void addWater();
-    
     void decGold();
-    
-    // Get amount of gold
     unsigned int getGold() const;
     
     // Get amount of sonar charges
@@ -141,13 +119,8 @@ public:
         tl = getTicksPerMove();
         hs = 0;
     }
-    virtual void move();
+    virtual void move()=0;
     virtual bool annoy(unsigned int amount);
-    virtual void addGold();
-    virtual bool huntsFrackMan() const;
-    
-    // Set state to having gien up protest
-    void setMustLeaveOilField();
     
     bool shouldLeaveOilField();
     void leave();
@@ -179,7 +152,6 @@ public:
         stepsLeft = stepsToMove;
     }
     virtual void move();
-    virtual void addGold();
 private:
     int stepsToMove;
     int stepsLeft;
@@ -189,10 +161,13 @@ class HardcoreProtester : public Protester
 {
 public:
     HardcoreProtester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score):Protester(imageID, startX, startY, world, hitPoints, score){
-        
+        stepsToMove = rand() % 53 + 8;
+        stepsLeft = stepsToMove;
     }
     virtual void move();
-    virtual void addGold();
+private:
+    int stepsToMove;
+    int stepsLeft;
 };
 
 class Dirt : public Actor{
@@ -203,7 +178,6 @@ public:
     
     virtual void move();
     
-    virtual ~Dirt(){}
 private:
 };
 
@@ -236,7 +210,6 @@ public:
     }
     virtual void move();
     int getSteps();
-    virtual bool canActorsPassThroughMe() const;
     void incrementSteps();
 private:
     int steps;
@@ -265,8 +238,6 @@ public:
         
     }
     virtual void move();
-    virtual bool canActorsPassThroughMe() const;
-    virtual bool needsToBePickedUpToFinishLevel() const;
 };
 
 class GoldNugget : public ActivatingObject
@@ -275,7 +246,6 @@ public:
     GoldNugget(int imageID, int startX, int startY, StudentWorld* world):ActivatingObject(imageID, startX, startY, world, right, 1, 2){
         
     }
-    virtual bool canActorsPassThroughMe() const;
     virtual void move();
     bool forFrackMan();
     void setForFrackMan();

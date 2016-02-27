@@ -1,0 +1,403 @@
+Class Hierarchy:
+Actor
+|	Agent
+|	|	FrackMan
+|	|	Protestors
+|	|	|	Regular Protestor
+|	|	|	Hardcore Protestor
+|	Activating Objects
+|	|	Oil Barrel
+|	|	Gold Nugget
+|	|	Sonar Kit
+|	|	Water Pool
+|	Dirt
+|	Boulder
+|	Squirt
+
+
+
+Public Functions Overview: (Most of them are pretty obvious from the name)
+No destructors other than for StudentWorld because no dynamic allocation was done other than in StudentWorld
+
+
+Class: Actor
+
+Actor(int imageID, int startX, int startY, StudentWorld* world, Direction dir = right, double size = 1.0, unsigned int depth = 0);
+	constructor for all actors. It has the default parameters that it has because these are the most commonly used values.
+
+virtual void move()=0;
+	move function that's called every tick. Pure virtual because Actor object is never created and must be derived.	
+
+bool isAlive() const;
+	checks if actor is alive. never modified
+
+void setDead();
+	marks the actor as dead. never modified
+
+virtual bool annoy(unsigned int amt);
+	decrease hit points of object by amt hit points. virtual because some objects handle this in different ways.
+
+StudentWorld* getWorld() const;
+	returns the studentWorld that is passed in when the object is created. never modified
+
+virtual bool canActorsPassThroughMe() const
+	return if frackman or protesters can pass through the object
+
+
+Class Agent:
+Agent(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = right, double size = 1.0, unsigned int depth = 0);
+
+virtual void addGold();
+	increment the agent's gold counter. virtual because on top of base functionality, each agent handles this differently.
+
+unsigned int getHitPoints() const;
+	number of Hitpoint's the agent has left.
+
+unsigned int getScore() const;
+	handles each agent's score.
+
+void setHitPoints(unsigned int hp);
+	sets the agent's initial number of hit points.
+
+void decrementHitPoints(unsigned int hp);
+	decrease the agent's hit points by hp when annoyed.
+
+virtual bool annoy(unsigned int amount);
+	annoys the agent by amount. Virtual because each agent handles this differently.
+
+
+Class FrackMan:
+FrackMan(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = right, double size = 1.0, unsigned int depth = 0)
+	constructor for Frackman
+
+virtual void move();
+	FrackMan's move function that's executed every tick.
+
+virtual bool annoy(unsigned int amount);
+	decreases FrackMan's hit points by amount.
+	returns if successful.
+
+virtual void addGold();
+	adds gold to Frackman.
+
+bool hasMoved();
+	returns if the frackman moved on the last tick. 
+
+void addSonar();
+	adds sonar to FrackMan
+
+void addWater();
+	adds water to FrackMan
+
+void decGold();
+	decreases gold from FrackMan when he drops it.
+
+unsigned int getGold() const;
+	increments counter when gold is picked up.
+
+unsigned int getSonar() const;
+	Get amount of sonar charges
+
+unsigned int getWater() const;
+	Get amount of water
+
+void getSquirtDets(int& x, int& y, GraphObject::Direction& dir);
+	provide squirt with position and direction
+
+
+
+Class Protestor:
+Protester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score, Direction dir = left, double size = 1.0, unsigned int depth = 0);
+	Constructor for Protestor.
+
+virtual void move()=0;
+	pure virtual because Protestor object is never created and both functions implement it differently.
+
+virtual bool annoy(unsigned int amount);
+	reduce hitPoints by amount. virtual because both protestors handle it differently.
+
+bool shouldLeaveOilField();
+	returns true if protestor has 0 hitPoints.
+
+void leave();
+	make protestor start leaving
+
+int getTicksPerMove();
+	returns number of ticks the protestor waits.
+
+void setTicksPerMove();
+	resets the number of ticks to wait after moving
+
+int getTicksLeft();
+	number of ticks left to wait
+
+void setTicksLeft(int ticks);
+	change number of ticks left to wait (protestor is squirted, finds gold, etc.)
+
+void decTicksLeft();
+	decrements the number of ticks left to wait
+
+bool hasShouted();
+	true if the protestor has shouted in the last 15 active ticks.
+
+void decHasShouted();
+	decrements the variable that keeps track of how long ago the Protestor shouted.
+
+void resetHasShouted();
+	called when protestor shouts.
+
+bool hasMadePerpendicularTurn();
+	sees if the protestor turned perpendicularly in the las 200 ticks.
+
+void decPerpendicularTurn();
+	decreases perpendicular turn counter
+
+void resetPerpendicularTurn();
+	resets the perpendicular turn counter when protestor has turned perpendicularly.
+
+
+class Regular Protestor:
+RegularProtester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score);
+	constructor
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+
+
+class Hardcore Protestor:
+HardcoreProtester(int imageID, int startX, int startY, StudentWorld* world, unsigned int hitPoints, unsigned int score);
+	constructor
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+
+class Dirt:
+Dirt(int imageID, int startX, int startY, StudentWorld* world, Direction dir = right, double size = 0.25, unsigned int depth = 3);
+	constructor
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+
+Class Boulder:
+Boulder(int imageID, int startX, int startY, StudentWorld* world, Direction dir = down, double size = 1, unsigned int depth = 1);
+	constructor
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+virtual bool canActorsPassThroughMe() const;
+	returns false since no actor can pass through a boulder.
+
+void setState(char c);
+	sets state to waiting ('w'), falling ('f') or stable ('s')
+
+char getState();
+	returns state character
+
+int getW();
+	gets the time the boulder has waited so far
+
+void incrementW();
+	increments the counter the boulder uses to see when it can fall.
+
+
+Class Squirt:
+Squirt(int imageID, int startX, int startY, StudentWorld* world, Direction dir = down, double size = 1, unsigned int depth = 1);
+	constructor
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+int getSteps();
+	return the steps the squirt has travelled (<4)
+	
+void incrementSteps();
+	increment steps that the squirt has travelled.
+
+
+Class Activating Object:
+ActivatingObject(int imageID, int startX, int startY, StudentWorld* world, Direction dir = down, double size = 1, unsigned int depth = 1);
+	Constructor
+
+virtual void move();
+	does nothing
+
+void playSound(int x);
+	plays the sound represented by x.
+
+void setTicksToLive(int ticks);
+	Set number of ticks until this object dies
+
+
+Class OilBarrel:
+OilBarrel(int imageID, int startX, int startY, StudentWorld* world)
+	constructor, default arguments in Activating Object handle the missing parameters.
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+
+Class GoldNugget:
+GoldNugget(int imageID, int startX, int startY, StudentWorld* world)
+	Constructor
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+bool forFrackMan();
+	returns true if gold is meant to be found by FrackMan.
+
+void setForFrackMan();
+	sets gold so only frackman can pick it up.
+
+void setForProtestor();
+	sets gold so only a protestor can pick it up.
+
+
+Class Sonar Kit:
+SonarKit(int imageID, int startX, int startY, StudentWorld* world);
+	constructor
+
+void setWait();
+	sets the time the sonar kits wait before disappearing
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+
+Class Water Pool:
+WaterPool(int imageID, int startX, int startY, StudentWorld* world);
+	constructor
+
+void setWait();
+	sets the time the sonar kits wait before disappearing
+
+virtual void move();
+	move function. follows spec sheet instructions
+
+
+class StudentWorld:
+StudentWorld(std::string assetDir);
+	constructor
+
+virtual int init();
+	initializes each level, creates dirt, boulders, and other objects.
+
+virtual int move();
+	calls the move function of each Actor other than the dirt objects.
+
+virtual void cleanUp();
+	deletes all dynamically allocated objects.
+
+~StudentWorld();
+	deletes all dynamically allocated objects.
+
+void clearDirt(int x, int y);
+	clears the dirt in a 4 by 4 square with the bottom right corner at (x, y)
+
+bool inOilField(int x, int y);
+	returns true if (x, y) is in the oil field.
+
+bool inSquirtField(int x, int y);
+	return true if (x, y) is in the 64 by 64 game world.
+
+bool isNear(int x1, int y1, int x2, int y2, int dist);
+	returns true if (x, y) and (x1, y1) are <= hist apart.
+
+std::vector<Actor*> getItems();
+	returns the vector which contains all the actor pointers.
+
+bool goodSpotBGO(int x, int y);
+	returns true if (x, y) is at least 6 squares away from all oil barrels, gold nuggets, and boulders.
+
+bool isFreeUnder(int x, int y);
+	returns true if there are no dirt objects under (x, y), (x+1, y), (x+2, y), and (x+3, y)
+
+bool canMoveDown(int x, int y);
+	returns true if the boulder can move down and handles the deaths of all the agents the boulder lands on. Sets the boulder to dead if it hits another boulder or dirt.
+
+void addSquirt();
+	adds Squirt pointer to vector of actor pointer. Plays the squirt sound.
+
+bool canMove(Actor* a, GraphObject::Direction dir);
+	return true if the actor can move at least one square in the given direction.
+
+void addGold();
+	adds GoldNugget pointer to the vector of Actor pointers
+void addSonarWater();
+	decides if sonar kit or water pool should be added
+	adds a pointer of that item to the vector of Actor pointers
+
+void addProtestor();
+	decides which protestor to add
+	decides if protestors should be added based on the target number of protestors and the number of protestors in the vector of actor pointers.
+	Adds protestor pointer to the vector of Actor pointers
+
+bool isFrackManNear(int x, int y, int dist);
+	returns true if FrackMan is within hist of (x, y)
+
+void oilFound();
+	decreases number of Oil Barrels in the game
+
+void goldFound();
+	adds gold to the frackman
+
+void waterFound();
+	adds a water pool to the frackman
+
+void chargeFound();	
+	adds a sonar kit to the frackman
+
+bool fourFree(int x, int y);
+	checks if there is a 4 by 4 square without dirt with bottom right corner at (x, y)
+
+bool canAnnoy(int x, int y, GraphObject::Direction dir);
+	checks if the protestor is facing in the direction towards the frackman
+
+void annoyFrackMan(int hp);
+	annoys the frackman by hp points
+
+bool lineOfSight(Protester* a, GraphObject::Direction& dir);
+	checks if the frackman is in the line of sight of the  protestor and sets dir equal to the direction in which FrackMan is.
+
+bool moveOne(Actor* a, GraphObject::Direction dir);
+	moves actor one step in the given direction.
+
+bool atIntersection(Protester* a, GraphObject::Direction& dir);
+	checks if Protestor is at intersection
+	chooses a random direction if it is
+	sets dir to that direction
+
+bool askForGold(Protester* p);
+	checks is there is any gold near the protestor that its allowed to take.
+	If so, handle that.
+
+bool isTrackable(int x, int y, int dist);
+	returns true if Hardcore protestor can track frackman.
+
+void solveFrackman(Protester* p, int&x, int&y);
+	attempts to get the position to which a hardcore protestor should travel when it's tracking frackman. Does not succeed. Incorrect implementation.
+
+void updateFrackManMaze();
+	updates the array that holds the maze representation. Incorrectly implemented.
+
+GraphObject::Direction getRandDirection(Actor* a);
+	gets a random direction that Actor can turn to and move at least one step.
+
+Incomplete functionality
+1. Both Protestors don't go back to the starting place. They are removed once they are full annoyed.
+2. Hardcore Protestor does not track FrackMan. If it's in a position where it should, it does nothing.
+
+Known Bugs:
+1. Squirt sometimes stop working for one specific directions. It may then resume working after some time. This bug only came after adding the protesters.
+2. Squirt does not display icon when FrackMan is 5 squares from the edge of the oil field but does everywhere else.
+
+Ambiguity:
+1. None that I took note of.
+
+Testing Classes:
+
+Tested all the things mentioned in the spec as I was coding. Some things failed. These are mentioned above.

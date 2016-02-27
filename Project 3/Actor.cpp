@@ -31,8 +31,10 @@ void FrackMan::move(){
                     move = false;
                     setDirection(left);
                 }
-                if(move && getX() > 0)
+                if(move && getX() > 0){
                     moveTo(getX()-1, getY());
+                    getWorld()->updateFrackManMaze();
+                }
                 else if (move && getX() == 0)
                     moveTo(getX(), getY());
                 break;
@@ -47,8 +49,10 @@ void FrackMan::move(){
                     move = false;
                     setDirection(right);
                 }
-                if(move && (getX()+3) < 63)
+                if(move && (getX()+3) < 63){
                     moveTo(getX()+1, getY());
+                    getWorld()->updateFrackManMaze();
+                }
                 else if (move && getX() + 3 == 63)
                     moveTo(getX(), getY());
                 break;
@@ -63,8 +67,11 @@ void FrackMan::move(){
                     move = false;
                     setDirection(up);
                 }
-                if(move && (getY()) < 60)
+                if(move && (getY()) < 60){
                     moveTo(getX(), getY()+1);
+                    getWorld()->updateFrackManMaze();
+                    
+                }
                 else if (move && getY() == 60)
                     moveTo(getX(), getY());
                 break;
@@ -80,8 +87,10 @@ void FrackMan::move(){
                     move = false;
                     setDirection(down);
                 }
-                if(move && getY() > 0)
+                if(move && getY() > 0){
                     moveTo(getX(), getY() - 1);
+                    getWorld()->updateFrackManMaze();
+                }
                 else if (move && getY() == 0)
                     moveTo(getX(), getY());
                 break;
@@ -97,6 +106,7 @@ void FrackMan::move(){
             case KEY_PRESS_TAB:
                 if (m_gold>0) {
                     getWorld()->addGold();
+                    decGold();
                 }
                 break;
             case 'z':
@@ -131,25 +141,16 @@ bool Actor::canActorsPassThroughMe() const{
     return true;
 }
 
-//-----------------------------redo
-bool Actor::canDigThroughDirt() const{
-    return true;
-}
+
 
 //-----------------------------redo
-bool Actor::canPickThingsUp() const{
-    return true;
-}
+
 
 //-----------------------------redo
-bool Actor::huntsFrackMan() const{
-    return false;
-}
+
 
 //-----------------------------redo
-bool Actor::needsToBePickedUpToFinishLevel() const{
-    return false;
-}
+
 
 void Actor::setDead(){
     setVisible(false);
@@ -172,9 +173,6 @@ bool Agent::annoy(unsigned int amount){
 }
 
 //-----------------------------redo
-bool Agent::canPickThingsUp() const{
-    return true;
-}
 
 void Agent::setHitPoints(unsigned int hp){
     m_hitPoints = hp;
@@ -191,7 +189,6 @@ unsigned int Agent::getScore() const{
 //-----------------------------redo
 bool FrackMan::annoy(unsigned int amount){
     decrementHitPoints(amount);
-    cout << getHitPoints() << endl;
     return true;
 }
 
@@ -210,11 +207,6 @@ void FrackMan::addSonar(){
 
 void FrackMan::addWater(){
     m_water+=5;
-}
-
-//-----------------------------redo
-bool FrackMan::canDigThroughDirt() const{
-    return true;
 }
 
 bool FrackMan::hasMoved(){
@@ -244,7 +236,6 @@ void FrackMan::getSquirtDets(int &x, int &y, Dir& dir){
             if(getWorld()->inSquirtField(getX(), getY() - 4)){
                 x = getX();
                 y = getY() - 4;
-                //cout << "X: " << x << "\tY: " << y << endl;
             }
             break;
         case GraphObject::up:
@@ -299,12 +290,23 @@ void Protester::decTicksLeft(){
 }
 
 bool Protester::annoy(unsigned int amount){
-    decrementHitPoints(amount);
+    if (amount == 3) {
+        decrementHitPoints(2);
+        getWorld()->increaseScore(150);
+    }
+    else{
+        decrementHitPoints(amount);
+    }
+    if (getHitPoints() > 20) {
+        leave();
+        getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
+        getWorld()->increaseScore(100);
+        setTicksLeft(0);
+    } else {
+        int n = 50 > 100-getWorld()->getLevel()*10 ? 50 : 100-getWorld()-> getLevel()*10;
+        setTicksLeft(getTicksLeft() + n);
+    }
     return true;
-}
-
-void Protester::addGold(){
-    
 }
 
 bool Protester::hasShouted(){
@@ -319,9 +321,6 @@ void Protester::decHasShouted(){
     hs--;
 }
 
-bool Protester::huntsFrackMan() const{
-    return true;
-}
 
 bool Protester::hasMadePerpendicularTurn(){
     return hasmadepturn > 0;
@@ -341,12 +340,12 @@ void RegularProtester::move(){
         return;
     }
     
-    vector<Actor*> items;
-//    for (int i =0; i < getWorld()->getItems().size(); i++) {
-//        if (getWorld()->isNear(getX(), getY(), items[i]->getX(), items[i]->getY(), 3) && !items[i]->canActorsPassThroughMe()) {
-//            
-//        }
-//    }
+    if (shouldLeaveOilField()) {
+        cout << "leave";
+        setDead();
+    }
+    
+    getWorld()->askForGold(this);
     
     //waiting
     if (getTicksLeft() > 0) {
@@ -404,17 +403,81 @@ void RegularProtester::move(){
     }
 }
 
-void RegularProtester::addGold(){
-    
-}
 
 void HardcoreProtester::move(){
+    //dead
+    if (!isAlive()) {
+        return;
+    }
     
+    if (shouldLeaveOilField()) {
+        cout << "leave";
+        setDead();
+    }
+    
+    getWorld()->askForGold(this);
+    
+    //waiting
+    if (getTicksLeft() > 0) {
+        decTicksLeft();
+        return;
+    } else{
+        setTicksPerMove();
+        setTicksLeft(getTicksPerMove());
+    }
+    decPerpendicularTurn();
+    //shouting gap
+    if (hasShouted()) {
+        decHasShouted();
+    }
+    
+    //maze solving leave
+    if (shouldLeaveOilField()) {
+        //leave
+        
+        setDead();
+        return;
+    }
+    
+    if (!hasShouted() && getWorld()->canAnnoy(getX(), getY(), getDirection())) {
+        getWorld()->playSound(SOUND_PROTESTER_YELL);
+        getWorld()->annoyFrackMan(2);
+        resetHasShouted();
+        return;
+    }
+    int m = 16 + getWorld()->getLevel()*2;
+    if (getWorld()->isTrackable(getX(), getY(), m)) {
+        //trackFrackman
+        return;
+    }
+    Dir dir = none;
+    if (getWorld()->lineOfSight(this, dir)) {
+        if (dir != none) {
+            setDirection(dir);
+            if (getWorld()->moveOne(this, dir)) {
+                ;
+            }
+        }
+        return;
+    }
+    dir = getDirection();
+    //if (stepsLeft > 0 && getWorld()->canMove(this, dir)) {
+    if (stepsLeft <= 0) {
+        dir = getWorld()->getRandDirection(this);
+        setDirection(dir);
+        stepsLeft = rand() % 53 + 8;
+    } else if (!hasMadePerpendicularTurn() && getWorld()->atIntersection(this, dir)) {
+        setDirection(dir);
+        stepsLeft = rand() % 53 + 8;
+        resetPerpendicularTurn();
+    }
+    if (getWorld()->canMove(this, getDirection())) {
+        getWorld()->moveOne(this, dir);
+    } else{
+        stepsLeft = 0;
+    }
 }
 
-void HardcoreProtester::addGold(){
-    
-}
 
 //-----------------------------redo
 unsigned int Agent::getHitPoints() const{
@@ -467,6 +530,19 @@ void Boulder::setState(char c){
 
 void Squirt::move(){
     Dir dir = getDirection();
+    vector<Actor*> items = getWorld()->getItems();
+    for (int i = 0; i < items.size(); i++){
+        if (getWorld()->isNear(getX(), getY(), items[i]->getX(), items[i]->getY(), 3)){
+            if((items[i]->getID() == IID_PROTESTER)) {
+                items[i]->annoy(2);
+                setDead();
+            }
+            if (items[i]->getID() == IID_HARD_CORE_PROTESTER) {
+                items[i]->annoy(3);
+                setDead();
+            }
+        }
+    }
     if (getSteps() == 4 || !getWorld()->squirtCanMove(getX(), getY(), getDirection())) {
         setDead();
         setVisible(false);
@@ -520,9 +596,6 @@ void Squirt::incrementSteps(){
     steps++;
 }
 
-bool Squirt::canActorsPassThroughMe() const{
-    return true;
-}
 
 void ActivatingObject::playSound(int x){
     getWorld()->playSound(x);
@@ -534,13 +607,6 @@ void ActivatingObject::move(){
     
 }
 
-bool OilBarrel::needsToBePickedUpToFinishLevel() const{
-    return true;
-}
-
-bool OilBarrel::canActorsPassThroughMe() const{
-    return true;
-}
 
 void OilBarrel::move(){
     if (!isAlive()){
@@ -579,10 +645,6 @@ void GoldNugget::move(){
         wait--;
     }
     
-}
-
-bool GoldNugget::canActorsPassThroughMe() const{
-    return true;
 }
 
 bool GoldNugget::forFrackMan(){
@@ -640,7 +702,4 @@ void WaterPool::move(){
     wait--;
 }
 
-void Protester::move(){
-    
-}
 

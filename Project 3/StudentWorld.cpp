@@ -1,6 +1,7 @@
 #include "StudentWorld.h"
 #include <string>
 #include <cmath>
+#include <queue>
 using namespace std;
 typedef GraphObject::Direction Dir;
 
@@ -72,6 +73,11 @@ int StudentWorld::move()
     char score[200];
     sprintf(score, "Scr: %0.6u  Lvl: %2u  Lives: %.1u  Hlth: %3u%%  Wtr: %2u  Gld: %2u  Sonar: %2u  Oil Left: %2d", getScore(), getLevel(), getLives(), (int)((double)(m_man->getHitPoints()/10)*100), m_man->getWater(), m_man->getGold(), m_man->getSonar(), numOil);
     setGameStatText(score);
+    
+    tToProtestor--;
+    if (tToProtestor <= 0 && numProtestors < targetProtestors) {
+        addProtestor();
+    }
     
     if (rand()%(getLevel()*25+300)==1) {
         addSonarWater();
@@ -195,6 +201,27 @@ int StudentWorld::init()
     return GWSTATUS_CONTINUE_GAME;
 }
 
+bool StudentWorld::askForGold(Protester* p){
+    for (int i = 0; i < items.size(); i++) {
+        if ((items[i]->getID()==IID_GOLD) && isNear(p->getX(), p->getY(), items[i]->getX(), items[i]->getY(), 3)) {
+            int n = 50 > 100-getLevel()*10 ? 50 : 100-getLevel()*10;
+            playSound(SOUND_PROTESTER_FOUND_GOLD);
+            if (p->getID()==IID_PROTESTER) {
+                p->leave();
+                increaseScore(25);
+            } else if (p->getID() == IID_HARD_CORE_PROTESTER){
+                increaseScore(50);
+            }
+            p->setTicksLeft(p->getTicksLeft() + n);
+            items[i]->setDead();
+            return true;
+            
+        }
+    }
+    return false;
+    
+}
+
 bool StudentWorld::goodSpotBGO(int x, int y){
     if(y > 3 && (x > 26 && x < 34)){
         return false;
@@ -247,8 +274,9 @@ bool StudentWorld::canMoveDown(int x, int y){
         m_man->setDead();
     }
     for (int i = 0; i < items.size(); i++) {
-        if (items[i]->getID() == IID_HARD_CORE_PROTESTER || items[i]->getID() == IID_PROTESTER) {
-            items[i]->setDead();
+        if (isNear(x, y, items[i]->getX(), items[i]->getY(), 3) && (items[i]->getID() == IID_HARD_CORE_PROTESTER || items[i]->getID() == IID_PROTESTER)) {
+            items[i]->annoy(100);
+            increaseScore(400);
         }
     }
     for (int i = 0; i < items.size(); i++) {
@@ -388,6 +416,7 @@ void StudentWorld::addSonarWater(){
 
 void StudentWorld::addProtestor(){
     numProtestors++;
+    tToProtestor = 25 > 200 - getLevel() ? 25 : 200 - getLevel();
     probHardcore = getLevel() * 10 + 30 < 90? getLevel() * 10 + 30: 90;
     if (rand() % 100 < probHardcore) {
         //create Hardcore
@@ -434,6 +463,36 @@ void StudentWorld::chargeFound(){
 void StudentWorld::waterFound(){
     m_man->addWater();
 }
+
+bool StudentWorld::isTrackable(int x, int y, int dist){
+    return isNear(x, y, m_man->getX(), m_man->getY(), dist);
+}
+
+void StudentWorld::solveFrackman(Protester* p, int &x, int &y){
+    queue<Coords> its;
+    
+    
+}
+
+void StudentWorld::updateFrackManMaze(){
+    for (int i = 0; i < 64; i++) {
+        for (int j = 0; j < 64; j++) {
+            if (inOilField(j, 59 - i)) {
+                if (m_dirt[j][59 - i] != nullptr) {
+                    frackManMaze[j][i] = '#';
+                } else {
+                    frackManMaze[j][i] = '-';
+                }
+            } else {
+                frackManMaze[j][i] = '-';
+            }
+            //cout << frackManMaze[j][i];
+        }
+        //cout << endl;
+    }
+    
+}
+
 
 bool StudentWorld::canAnnoy(int x, int y, GraphObject::Direction dir){
     if (!isNear(x, y, m_man->getX(), m_man->getY(), 4)) {
